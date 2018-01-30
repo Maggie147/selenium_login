@@ -1,0 +1,64 @@
+selenium
+selenium可以模拟真实浏览器，自动化测试工具，支持多种浏览器，爬虫中主要用来解决JavaScript渲染问题
+
+包安装selenium package
+
+   pip install -U selenium
+
+  （可能第一次不会成功，需要多尝试几次）
+
+1、导入selenium  package 建立webdriver对象（需要指定浏览器驱动路径）
+
+   from selenium import webdriver
+   driver = webdriver.Chrome()
+   driver = webdriver.Firefox(executable_path = '/home/home/Downloads/selenium/geckodriver')
+
+
+2、打开设定的url，并等待response
+
+   driver.get("https://www.python.ory")
+   time.sleep(10) 
+
+
+3、元素查找， 通过xpath找到登录框，并填入相应帐号密码，模拟点击登录
+input_first = browser.find_element_by_id("q")
+input_second = browser.find_element_by_css_selector("#q")
+input_third = browser.find_element_by_xpath
+find_element_by_name
+find_element_by_id
+find_element_by_xpath
+find_element_by_link_text
+find_element_by_partial_link_text
+find_element_by_tag_name
+find_element_by_class_name
+find_element_by_css_selector
+
+
+4、验证登录成功与否，若currenturl发生变化，则认为登录成功
+
+
+
+5、Cookie操作，通过对象的方法获取当前访问网站的cookie
+get_cookies()
+delete_all_cookes()
+add_cookie()
+
+
+
+6、得到cookie之后，就可以通过requests(其他urllib2等也可)访问相应的网站，并可实现网页爬取等工作
+
+其他：
+执行js：
+browser.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+browser.execute_script('alert("To Bottom")')
+
+等待：
+browser.implicitly_wait(10)
+from selenium.webdriver.support.ui import WebDriverWait
+wait = WebDriverWait(browser, 10)
+
+
+PhantomJS
+PhantomJS是一个基于webkit的JavaScript API，支持Web而不需要浏览器支持，其快速、原生支持各种Web标准：Dom处理，CSS选择器，JSON等等。
+PhantomJS的用处可谓非常广泛，诸如网络监测、网页截屏、无需浏览器的 Web 测试、页面访问自动化等。
+ 

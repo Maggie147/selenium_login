@@ -1,0 +1,18 @@
+selenium-webdriver各种驱动：
+https://seleniumhq.github.io/selenium/docs/api/javascript/index.html
+
+火狐浏览器驱动下载地址：
+https://github.com/mozilla/geckodriver/releases/
+
+chrome浏览器驱动下载：
+http://chromedriver.storage.googleapis.com/index.html
+https://sites.google.com/a/chromium.org/chromedriver/downloads
+
+
+测试代码在Windows环境下进行，
+Google Chrome Version 64.0.3282.119(64位)
+chromedriver_win32.zip
+
+
+Firefox Version 58.0（64位）
+geckodriver-v0.19.1-win64.zip
