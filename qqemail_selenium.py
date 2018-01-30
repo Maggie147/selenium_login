@@ -221,7 +221,7 @@ def main():
 
     page1 = get_qqmail_list(header, sid, '0')
     # print page1
-    write_date_2file('./', 'page1.html', page1.decode().encode('gbk'))
+    write_date_2file('./Download/', 'page1.html', page1.decode().encode('gbk'))
 
 if __name__ == '__main__':
     main()
