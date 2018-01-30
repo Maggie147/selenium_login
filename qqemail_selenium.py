@@ -161,11 +161,14 @@ def get_sid(buf, head_str='?sid=', tail_str='&'):
     try:
         begin = buf.find(head_str)
         if begin:
-            end = buf[begin+len(head_str):].find(tail_str)
-            if end:
-                sid = buf[begin+len(head_str): begin+len(head_str)+end]
+            if tail_str:
+                end = buf[begin+len(head_str):].find(tail_str)
+                if end:
+                    sid = buf[begin+len(head_str): begin+len(head_str)+end]
+                else:
+                    sid = buf[begin+len(head_str):]
             else:
-                sid = buf[begin: ]
+                sid = buf[begin+len(head_str):]
         else:
             print "no find head_str"
     except Exception as e:
