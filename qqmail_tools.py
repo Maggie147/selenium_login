@@ -6,16 +6,15 @@ import sys
 import time
 import json
 # import chardet
-import cookielib
-import email
 import pprint
-sys.path.append('./')
-
+import email
+import requests
+# sys.path.append('./')
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def get_headers(cookie=None, para):
+def get_headers(cookie=None, para=None):
     header = {}
     header['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
     if cookie:
@@ -45,16 +44,14 @@ def get_sid(buf, head_str='?sid=', tail_str='&'):
     return sid
 
 # get sid, folderid, folderkey
-def get_url_args(buf):
+def get_url_args(buf, sid):
     args = {'sid': '', 'folderid':'', 'folderkey':''}
-    sid = get_sid(buf)
-    if not sid:
-        return args
+    args['sid'] = sid
     try:
-        args['folderid'] = get_sid(buf, 'folderid=', '&')
+        folderid = get_sid(buf, 'folderid=', '&')
+        args['folderid'] = folderid if len(folderid) < 4 else ''
     except Exception as e:
         args['folderid'] = '1'
-
     try:
         folderkey = get_sid(buf, 'folderkey=', '&')
         args['folderkey'] = folderkey if len(folderkey) < 4 else ''
@@ -120,15 +117,13 @@ def get_one_page_url(buf, args):
             continue
         for mailid_tmp in mailid_list:
             mailid = mailid_tmp
-            url_tmp = 'http://mail.qq.com/cgi-bin/readmail?folderid={}&folderkey={}&t=readmail&mailid={}&mode=pre&maxage=3600&base=12.9&ver=14705&'.format(
+            url_tmp = 'http://mail.qq.com/cgi-bin/readmail?folderid={}&folderkey={}&t=readmail&mailid={}&mode=pre&maxage=3600&base=12.9&ver=14705&sid={}'.format(
                 args['folderid'], args['folderkey'], mailid, args['sid'])
             url_list.append(url_tmp)
     return url_list
 
 
-
-
-def write_data_file(buf, fpath, ftype):
+def write_data_file(buf, fpath, ftype=None):
     try:
         path = os.path.split(fpath)[0]
         if not os.path.exists(path):
@@ -146,7 +141,7 @@ def write_data_file(buf, fpath, ftype):
         print(e)
 
 
-def get_file_data(fpath, ftype):
+def get_file_data(fpath, ftype=None):
     try:
         if ftype == 'json':
             with open(fpath, 'r') as fjson:
@@ -164,22 +159,57 @@ def get_file_data(fpath, ftype):
 
 
 def test():
+    global user
+    user = '740954235'
+
     # 解析出邮件主页导航栏中每一类别邮件的URL
-    buf = get_file_data(fpath='./output/page/qqmail_main.html')
-    dirs = get_mail_dirs(buf)
-    pprint.pprint(dirs)
+    buff = get_file_data(fpath='./output/%s/qqmail_main_page.html'%user)
+    if buff:
+        dirs = get_mail_dirs(buff)
+        pprint.pprint(dirs)
+        print('Test1: Analyse qqmail_main_page, get mail_list END.\n')
 
 
-    mail_cat = get_file_data(fpath='./output/page/maillist_page1.html', ftype='html')
-    cnt = mail_page_cnt(mail_cat)
-    print("cnt:", )
+    # 获取sid, folderid, folderkey
+    url = "'http://mail.qq.com/cgi-bin/mail_list?sid=rdbiSloWkLpjfVEL&folderid=1&page=0&s=inbox&showinboxtop=1&loc=folderlist,,,1"
+    sid = get_sid(url)
+    args = get_url_args(url, sid)
+    if url:
+        print("sid: ", sid)
+        pprint.pprint(args)
+        print('Test2: Analyse URL, get sid, folderid, folderkey END.\n')
 
-    mail_url = ""
-    args = get_url_args(mail_url)
 
-    url_list = get_one_page_url(mail_cat, args)
-    pprint.pprint(url_list)
-    print(len(url_list))
+    # 获取登录保存的 header: cookie, referer
+    header = get_file_data(fpath='./output/%s/qqmail_login.json'%user, ftype='json')
+    pprint.pprint(header)
+    print('Test3: get login cookie END.\n')
+
+
+    # 解析每类邮件主页（分页数，邮件URL列表）
+    mbuf = get_file_data(fpath='./output/%s/maillist_page1.html'%user)
+    if mbuf:
+        # 每一类邮件主页中,获取该类邮件分页数
+        cnt  = mail_page_cnt(mbuf)
+        print("cnt: ", cnt)
+
+        # 每一类邮件中，邮件URL列表
+        url_list = get_one_page_url(mbuf, args)
+        pprint.pprint(url_list)
+        print("url_list:", len(url_list))
+        print('Test4: Analyse per_category mail_page, get mail_list(url_list) END.\n')
+
+        # test requests mail_url
+        if header:
+            test_url = url_list[0]
+            mailpage = requests.get(test_url, header)
+            if str(mailpage.status_code)[0] != '2':
+                print("request failed!!")
+            else:
+                write_data_file(mailpage.text, fpath='./output/{}/eml/qqmail_emal_test.eml'.format(user))
+            print("URL: ", test_url)
+            print('Test5: requests mail_url END.\n')
+
 
 
 

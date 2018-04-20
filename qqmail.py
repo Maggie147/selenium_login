@@ -6,13 +6,12 @@ import sys
 import time
 import json
 # import chardet
-import cookielib
+import pprint
 import email
+import cookielib
 import threading
 import requests
-from requests import Session
 from multiprocessing.dummy import Pool
-import pprint
 sys.path.append('./')
 from selenium_login import QQEmailLogin
 from qqmail_tools import *
@@ -22,11 +21,13 @@ sys.setdefaultencoding('utf8')
 
 # 每一类邮件主页请求并分析, 返回每一类邮件中所有邮件的url_list
 def analy_page_list(url, header, args):
-    response = requests.get(url, headers=header)    # 请求 每一类邮件main html
+    global user
+    response = requests.get(url, headers=header)      # 请求 每一类邮件main html
+    # response = sessrequ.get(url)                        # 请求 每一类邮件main html
     if str(response.status_code)[0] != '2':
         print("request failed!!")
         return None
-    write_data_file(response.text, fpath='./output/page/maillist_page{}.html'.format(args['folderid']), ftype='html')
+    write_data_file(response.text, fpath='./output/{}/maillist_page{}.html'.format(user, args['folderid']), ftype='html')
 
     # 解析每类邮件主页 显示的邮件页数，无法获取页数或者页数为0，该类中没有邮件
     cnt = mail_page_cnt(response.text)
@@ -45,29 +46,34 @@ def analy_page_list(url, header, args):
 
 
 def main():
-    username = "925321080@qq.com"
-    password = "dong890721!"
+    global user
+    global sessrequ
+
+    username = "740954235@qq.com"
+    password = "Tessie1126"
+    user  =  username.split('@')[0]
     qqobj = QQEmailLogin(username, password, dtype='chrome')
     cookie   = qqobj.cookie
     host_url = qqobj.host_url
     print(host_url)
 
-    # step1: get sid, folderid, folderkey
-    args = get_url_args(url)
-    if not args['sid']:
+    # step1: get sid, folderid, folderkey, header
+    sid = get_sid(host_url)
+    if not sid:
         print("get sid failed!!!")
         return
-    para = {'referer': 'https://mail.qq.com/cgi-bin/frame_html?sid=%s'%args['sid']}
+    para = {'referer': 'https://mail.qq.com/cgi-bin/frame_html?sid=%s'%sid}
     headers = get_headers(cookie, para)
-    # write_data_file(headers, fpath='./data/qqmail_header.json' , ftype='json')
+    write_data_file(headers, fpath='./output/%s/qqmail_login.json'%user , ftype='json')
 
 
     # step2: By cookie, requests qq mail main_page
+    # sessrequ = requests.session()
     response = requests.get(host_url, headers=headers)    # get qqmail main html
     if str(response.status_code)[0] != '2':
         print("request failed!!")
         return
-    # write_data_file(response.text, fpath='./output/page/qqmail_main.html', ftype='html')
+    write_data_file(response.text, fpath='./output/%s/qqmail_main_page.html'%user, ftype='html')
 
 
     # step3: 解析出邮件主页导航栏中每一类别邮件的URL
@@ -78,6 +84,7 @@ def main():
     # step4: 分别获取每类邮件列表中的邮件URL
     all_mail_list = []
     for url in dirs:
+        args = get_url_args(url, sid)
         mail_list = analy_page_list(url, headers, args)
         if not mail_list:
             continue
@@ -88,17 +95,17 @@ def main():
                 all_mail_list.append(item)
             else:
                 pass
-    # print("all maillist len: ", all_mail_list)
     print("all maillist len: ", len(all_mail_list))
 
 
     # step5: 请求每个邮件
     mailpage = requests.get(all_mail_list[0], headers)
+    # mailpage = sessrequ.get(all_mail_list[0])
     if str(mailpage.status_code)[0] != '2':
         print("request failed!!")
         return
     tmp_mail_id = 1
-    write_data_file(mailpage.text, fpath='./output/eml/emal_{}.eml'.format(tmp_mail_id))
+    write_data_file(mailpage.text, fpath='./output/{}/eml/qqmail_emal_{}.eml'.format(user, tmp_mail_id))
 
 
 
