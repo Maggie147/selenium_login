@@ -22,8 +22,7 @@ sys.setdefaultencoding('utf8')
 # 每一类邮件主页请求并分析, 返回每一类邮件中所有邮件的url_list
 def analy_page_list(url, header, args):
     global user
-    response = requests.get(url, headers=header)      # 请求 每一类邮件main html
-    # response = sessrequ.get(url)                        # 请求 每一类邮件main html
+    response = sessrequ.get(url, headers=header)      # 请求 每一类邮件main html
     if str(response.status_code)[0] != '2':
         print("request failed!!")
         return None
@@ -68,8 +67,8 @@ def main():
 
 
     # step2: By cookie, requests qq mail main_page
-    # sessrequ = requests.session()
-    response = requests.get(host_url, headers=headers)    # get qqmail main html
+    sessrequ = requests.session()
+    response = sessrequ.get(host_url, headers=headers)    # get qqmail main html
     if str(response.status_code)[0] != '2':
         print("request failed!!")
         return
@@ -99,8 +98,7 @@ def main():
 
 
     # step5: 请求每个邮件
-    mailpage = requests.get(all_mail_list[0], headers)
-    # mailpage = sessrequ.get(all_mail_list[0])
+    mailpage = sessrequ.get(all_mail_list[0], headers=headers)
     if str(mailpage.status_code)[0] != '2':
         print("request failed!!")
         return
