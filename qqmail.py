@@ -43,15 +43,30 @@ def analy_page_list(url, header, args):
     return mail_list
 
 
+def get_mail_page(para):
+    global headers
+    global sessrequ
+    try:
+        url = para[0]
+        num = para[1]
+        mailpage = sessrequ.get(url, headers=headers, timeout=30, stream=True)
+        if str(mailpage.status_code)[0] != '2':
+            print("request failed!!")
+            return
+        write_data_file(mailpage.text, fpath='./output/{}/eml/qqmail_emal_{}.eml'.format(user, num))
+    except Exception as e:
+        print(e)
+
 
 def main():
     global user
     global sessrequ
+    global headers
 
     username = "740954235@qq.com"
     password = "Tessie1126"
     user  =  username.split('@')[0]
-    qqobj = QQEmailLogin(username, password, dtype='chrome')
+    qqobj = QQEmailLogin(username, password, dtype='chrome')    # chrome, firefox
     cookie   = qqobj.cookie
     host_url = qqobj.host_url
     print(host_url)
@@ -94,16 +109,16 @@ def main():
                 all_mail_list.append(item)
             else:
                 pass
-    print("all maillist len: ", len(all_mail_list))
 
+    num = len(all_mail_list)
+    nums = range(1, num +1)
+    print("all maillist len: ", num)
 
     # step5: 请求每个邮件
-    mailpage = sessrequ.get(all_mail_list[0], headers=headers)
-    if str(mailpage.status_code)[0] != '2':
-        print("request failed!!")
-        return
-    tmp_mail_id = 1
-    write_data_file(mailpage.text, fpath='./output/{}/eml/qqmail_emal_{}.eml'.format(user, tmp_mail_id))
+    pool = Pool(20)
+    pool.map(get_mail_page, zip(all_mail_list, nums))
+    pool.close()
+    pool.join()
 
 
 

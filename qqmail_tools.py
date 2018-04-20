@@ -157,7 +157,7 @@ def get_file_data(fpath, ftype=None):
         print(e)
         return None
 
-
+# test [re]Analyse  html page
 def test():
     global user
     user = '740954235'
@@ -211,7 +211,33 @@ def test():
             print('Test5: requests mail_url END.\n')
 
 
+# test: cookie request url
+def test_request():
+    global user
+    user = '740954235'
+
+
+    # 获取登录保存的 header: cookie, referer
+    headers = get_file_data(fpath='./output/%s/qqmail_login.json'%user, ftype='json')
+    pprint.pprint(headers)
+
+
+    sid = get_sid(headers['referer'])
+    try:
+        host_url = "http://mail.qq.com/cgi-bin/frame_html?sid=%s".format(sid)
+    except Exception as e:
+        print("not get sid")
+        return
+
+    # sessrequ = requests.session()
+    response = requests.get(host_url, headers=headers)    # get qqmail main html
+    if str(response.status_code)[0] != '2':
+        print("request failed!!")
+        return
+    print response.status_code
+    write_data_file(response.text, fpath='./output/%s/qqmail_main_page_test.html'%user, ftype='html')
 
 
 if __name__ == '__main__':
-    test()
+    # test()
+    test_request()
