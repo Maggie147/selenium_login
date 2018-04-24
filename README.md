@@ -7,9 +7,9 @@
 * Firefox Version 58.0（64位）/geckodriver-v0.19.1-win64.zip。
 
 ## 项目主要功能介绍：
-* 1、通过selenium登录邮箱并获取登录的cookie数据
+* 1、selenium_login.py 通过selenium登录邮箱并获取登录的cookie数据(包括：QQ邮箱、sina邮箱)
 * 2、主要通过 re 解析页面
-* 3、分别获取每类邮箱链接，再获取该类别下的邮件
+* 3、分别获取每类邮箱链接，再获取该类别下的邮件。
 * 4、主要数据目录结构, 在主程序`qqmail.py` 同目录下的`output`下。
 	```
 	output
@@ -18,15 +18,15 @@
 	|        |
 	|        |___eml[保存的邮件]
 	|        |
-	|        页面.html
-	|		 ...
+	|        页面.html及其他文件
+	|        ...
 	|
 	|___邮箱账号2
 	|        |
 	|        |___eml[保存的邮件]
 	|        |
-	|        页面.html
-	|		 ...
+	|        页面.html及其他文件
+	|        ...
 	...
 	```
 
@@ -48,3 +48,9 @@
 selenium-webdriver相关驱动下载来源：
 * https://seleniumhq.github.io/selenium/docs/api/javascript/index.html
 * https://pypi.org/project/selenium/3.8.1/
+
+## 运行脚本
+	```
+	python qq_mail.py
+	python sina_mail.py
+	```
