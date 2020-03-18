@@ -252,8 +252,8 @@ class QQMail(object):
 
 
 def main():
-    username = "740954235@qq.com"
-    password = "Tessie1126"
+    username = "xxxxxx"
+    password = "xxxxxx"
     fpath    = './output'
 
     # selenium get  qq login cookie
